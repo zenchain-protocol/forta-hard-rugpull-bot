@@ -1,4 +1,4 @@
-const parser = require('@solidity-parser/parser');
+import { parse, visit } from '@solidity-parser/parser';
 
 const isTokenContract = (callableFunctions, events) => {
     return callableFunctions.includes('name') &&
@@ -20,8 +20,8 @@ return callableFunctions.includes('owner') &&
         events.includes('OwnershipTransferred');
 }
 
-const parseContract = (sourceCode) => {
-    const ast = parser.parse(sourceCode, { loc: true });
+export const parseContract = (sourceCode) => {
+    const ast = parse(sourceCode, { loc: true });
 
     const contracts = [];
     for (const node of ast.children) {
@@ -88,7 +88,7 @@ const parseContract = (sourceCode) => {
     events = new Array(...events);
 
     let hasBalanceVariable = false;
-    parser.visit(mainNodes, {
+    visit(mainNodes, {
         "StateVariableDeclaration": function(node) {
             for (const varDecl of node.variables) {
                 if (varDecl.name === '_balances' && varDecl.typeName.type === 'Mapping') {
@@ -109,8 +109,4 @@ const parseContract = (sourceCode) => {
         "entryContract": topNode,
         "hasBalanceVariable": hasBalanceVariable,
     };
-}
-
-module.exports = {
-    parseContract,
 }

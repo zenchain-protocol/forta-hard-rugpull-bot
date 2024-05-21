@@ -1,16 +1,13 @@
-const {
-    ethers,
-    getJsonRpcUrl,
-} = require("forta-agent");
-const parser = require('@solidity-parser/parser');
-const { parseContract } = require('./parser')
-const prettier = require("prettier");
-const fs = require('fs');
-const shell = require('shelljs');
+import { visit } from '@solidity-parser/parser';
+import { format } from "prettier";
+import { writeFileSync } from 'fs';
+import shell from 'shelljs';
+import { getProvider, ethers } from "@fortanetwork/forta-bot";
+import { parseContract } from './parser.js';
 
 const findConstructor = (entryContract) => {
     let constructor;
-    parser.visit(entryContract, {
+    visit(entryContract, {
         FunctionDefinition: function(fn) {
             if (fn.isConstructor && fn.name === null) {
                 constructor = fn;
@@ -20,8 +17,8 @@ const findConstructor = (entryContract) => {
     return constructor;
 }
 
-const DefaultInjector = (sourceCode) => {
-    const formattedSourceCode = prettier.format(sourceCode, {
+export const DefaultInjector = (sourceCode) => {
+    const formattedSourceCode = format(sourceCode, {
         parser: 'solidity-parse',
     });
     const contractInfo = parseContract(formattedSourceCode)
@@ -61,12 +58,12 @@ const DefaultInjector = (sourceCode) => {
         injectSourceCode += '\npragma experimental ABIEncoderV2;\n';
     }
     injectSourceCode += '\nimport "forge-std/Test.sol";\n';
-    return prettier.format(injectSourceCode, {
+    return format(injectSourceCode, {
         parser: 'solidity-parse',
     })
 }
 
-class DynamicTest {
+export class DynamicTest {
     constructor(sourceCode, constructorArguments) {
         this.sourceCode = sourceCode;
 
@@ -314,11 +311,12 @@ contract DynamicHiddenTransferRevertsTest is Test {
             testedCode += `\n${this.testFakeOwnershipRenounciation}`;
         }
 
-        fs.writeFileSync('./test/test.sol', testedCode, 'utf8');
+        writeFileSync('./test/test.sol', testedCode, 'utf8');
 
         let testResultJson;
+        const provider = await getProvider();
         try {
-            const testCommand = `RUST_LOG=off forge test -f ${getJsonRpcUrl()} --fork-block-number ${txEvent.block.number} --json --silent`
+            const testCommand = `RUST_LOG=off forge test -f ${provider.connection.url} --fork-block-number ${txEvent.block.number} --json --silent`
             const timeBefore = Date.now();
             const testResult = await shell.exec(testCommand, {silent: true}).toString();
             const timeAfter = Date.now();
@@ -331,9 +329,4 @@ contract DynamicHiddenTransferRevertsTest is Test {
 
         return testResultJson;
     }
-}
-
-module.exports = {
-    DefaultInjector,
-    DynamicTest,
 }

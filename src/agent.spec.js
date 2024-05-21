@@ -1,8 +1,7 @@
 require("dotenv").config();
-const { provideHandleTransaction } = require("../src/agent");
-const { TransactionEvent, Network, EventType } = require("forta-agent");
-const ethers = require("ethers");
-const fetchMock = require("jest-fetch-mock");
+import { provideHandleTransaction } from "./agent.js";
+import { TransactionEvent, Network, EventType } from "@fortanetwork/forta-bot";
+import { enableMocks, resetMocks } from "jest-fetch-mock";
 
 // TODO: Get a test like below actually working, post-upgrade
 
@@ -23,10 +22,10 @@ jest.mock("shelljs", () => ({
   })),
 }));
 
-fetchMock.enableMocks();
+enableMocks();
 
-jest.mock("forta-agent", () => ({
-  ...jest.requireActual("forta-agent"),
+jest.mock("@fortanetwork/forta-bot", () => ({
+  ...jest.requireActual("@fortanetwork/forta-bot"),
   getEthersProvider: () => ({
     getCode: jest.fn(
       () =>
@@ -89,13 +88,13 @@ describe("agent.js", () => {
     ],
   };
 
-//   beforeAll(() => {
-//     handleTransaction = provideHandleTransaction;
-//     fetchMock.mockResponseOnce(JSON.stringify(mockResponse));
-//   });
+  beforeAll(() => {
+    handleTransaction = provideHandleTransaction;
+    fetchMock.mockResponseOnce(JSON.stringify(mockResponse));
+  });
 
   afterEach(() => {
-    fetchMock.resetMocks();
+    resetMocks();
   });
 
   it("should handle a transaction and return findings", async () => {
