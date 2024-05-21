@@ -13,10 +13,6 @@
     43114
   ],
   "chainSettings": {
-    "default": {
-      "shards": 2,
-      "target": 10
-    },
     "56": {
       "shards": 4,
       "target": 5
@@ -24,6 +20,10 @@
     "137": {
       "shards": 4,
       "target": 5
+    },
+    "default": {
+      "shards": 2,
+      "target": 10
     }
   },
   "scripts": {
@@ -56,6 +56,7 @@
   },
   "devDependencies": {
     "jest": "^27.0.6",
+    "jest-fetch-mock": "^3.0.3",
     "nodemon": "^2.0.8"
   }
 }
