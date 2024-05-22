@@ -17,12 +17,13 @@ import shell from "shelljs";
 dotenv.config();
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
-const OPTIMISM_ETHERSCAN_API_KEY = process.env.OPTIMISM_ETHERSCAN_API_KEY;
-const BSCSCAN_API_KEY = process.env.BSCSCAN_API_KEY;
-const POLYGONSCAN_API_KEY = process.env.POLYGONSCAN_API_KEY;
-const FTMSCAN_API_KEY = process.env.FTMSCAN_API_KEY;
-const ARBISCAN_API_KEY = process.env.ARBISCAN_API_KEY;
-const SNOWTRACE_API_KEY = process.env.SNOWTRACE_API_KEY;
+// TODO: Get other networks fully working before request changes be merged into parent
+// const OPTIMISM_ETHERSCAN_API_KEY = process.env.OPTIMISM_ETHERSCAN_API_KEY;
+// const BSCSCAN_API_KEY = process.env.BSCSCAN_API_KEY;
+// const POLYGONSCAN_API_KEY = process.env.POLYGONSCAN_API_KEY;
+// const FTMSCAN_API_KEY = process.env.FTMSCAN_API_KEY;
+// const ARBISCAN_API_KEY = process.env.ARBISCAN_API_KEY;
+// const SNOWTRACE_API_KEY = process.env.SNOWTRACE_API_KEY;
 
 const taskQueue = [];
 let findingsCache = [];
@@ -46,18 +47,19 @@ const getSourceCode = async (txEvent, contractAddress) => {
   const network = parseInt(txEvent.network);
   if (network === 1) {
     apiEndpoint = `https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${ETHERSCAN_API_KEY}`;
-  } else if (network === 10) {
-    apiEndpoint = `https://api-optimistic.etherscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${OPTIMISM_ETHERSCAN_API_KEY}`;
-  } else if (network === 56) {
-    apiEndpoint = `https://api.bscscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${BSCSCAN_API_KEY}`;
-  } else if (network === 137) {
-    apiEndpoint = `https://api.polygonscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${POLYGONSCAN_API_KEY}`;
-  } else if (network === 250) {
-    apiEndpoint = `https://api.ftmscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${FTMSCAN_API_KEY}`;
-  } else if (network === 42161) {
-    apiEndpoint = `https://api.arbiscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${ARBISCAN_API_KEY}`;
-  } else if (network === 43114) {
-    apiEndpoint = `https://api.snowtrace.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${SNOWTRACE_API_KEY}`;
+  // TODO: Get other networks fully working before request changes be merged into parent
+  // } else if (network === 10) {
+  //   apiEndpoint = `https://api-optimistic.etherscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${OPTIMISM_ETHERSCAN_API_KEY}`;
+  // } else if (network === 56) {
+  //   apiEndpoint = `https://api.bscscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${BSCSCAN_API_KEY}`;
+  // } else if (network === 137) {
+  //   apiEndpoint = `https://api.polygonscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${POLYGONSCAN_API_KEY}`;
+  // } else if (network === 250) {
+  //   apiEndpoint = `https://api.ftmscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${FTMSCAN_API_KEY}`;
+  // } else if (network === 42161) {
+  //   apiEndpoint = `https://api.arbiscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${ARBISCAN_API_KEY}`;
+  // } else if (network === 43114) {
+  //   apiEndpoint = `https://api.snowtrace.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${SNOWTRACE_API_KEY}`;
   } else {
     // TODO: support arbitrary RPC
     throw new Error("Network not supported");
@@ -68,7 +70,7 @@ const getSourceCode = async (txEvent, contractAddress) => {
   return data.result[0].SourceCode;
 };
 
-const runInvarianceTest = async (txEvent, createdContract) => {
+const runInvarianceTest = async (txEvent, createdContract, provider) => {
   let sourceCode = await getSourceCode(txEvent, createdContract);
   if (!sourceCode) return;
   console.log(`Found source code for ${createdContract}...`);
@@ -127,7 +129,7 @@ const runInvarianceTest = async (txEvent, createdContract) => {
   const injectedSourceCode = DefaultInjector(sourceCode);
   testing = new DynamicTest(injectedSourceCode, constructArguments);
 
-  const results = await testing.test(txEvent);
+  const results = await testing.test(txEvent, provider);
   const rugpullTechniques = [];
 
   for (const [key, value] of Object.entries(results)) {
@@ -239,21 +241,21 @@ const runTaskConsumer = async (testingContext) => {
     }
 
     try {
-      const { txEvent, createdContract } = taskQueue.shift();
+      const { txEvent, createdContract, provider } = taskQueue.shift();
       console.log(`Running task for ${txEvent.transaction.hash}...`);
 
-      await runInvarianceTest(txEvent, createdContract);
+      await runInvarianceTest(txEvent, createdContract, provider);
     } catch (e) {
       console.log(e);
     }
   }
 };
 
-export const provideHandleTransaction = async (txEvent, testingContext) => {
+export const provideHandleTransaction = async (txEvent, provider, testingContext) => {
   let findings = [];
 
   if (!consumerStarted) {
-    runTaskConsumer(testingContext);
+    runTaskConsumer(testingContext, provider);
   }
 
   const createdContract = await getCreatedContractAddress(txEvent);
@@ -265,7 +267,7 @@ export const provideHandleTransaction = async (txEvent, testingContext) => {
     `Found contract creation transaction ${txEvent.transaction.hash}: ${createdContract}...`
   );
 
-  taskQueue.push({ txEvent, createdContract });
+  taskQueue.push({ txEvent, createdContract, provider });
   console.log(
     `[${taskQueue.length}] Added task for ${txEvent.transaction.hash}...`
   );
@@ -286,10 +288,10 @@ export const provideHandleTransaction = async (txEvent, testingContext) => {
   return findings;
 };
 
-export const handleTransaction = async (txEvent) => {
-  return await provideHandleTransaction(txEvent, false);
+export const handleTransaction = async (txEvent, provider) => {
+  return await provideHandleTransaction(txEvent, provider, false);
 };
 
-const initialize = async () => {
+export const initialize = async () => {
   runTaskConsumer(false);
 };

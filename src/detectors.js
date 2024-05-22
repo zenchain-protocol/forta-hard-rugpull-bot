@@ -2,7 +2,7 @@ import { visit } from '@solidity-parser/parser';
 import { format } from "prettier";
 import { writeFileSync } from 'fs';
 import shell from 'shelljs';
-import { getProvider, ethers } from "@fortanetwork/forta-bot";
+import { ethers } from "@fortanetwork/forta-bot";
 import { parseContract } from './parser.js';
 
 const findConstructor = (entryContract) => {
@@ -289,7 +289,7 @@ contract DynamicHiddenTransferRevertsTest is Test {
 `
     }
 
-    async test(txEvent) {
+    async test(txEvent, provider) {
         if (!this.contractInfo.isTokenContract) {
             console.log(`Tests skipped for ${txEvent.transaction.hash}: not a standard ERC20 token contract`);
             return {};
@@ -314,7 +314,6 @@ contract DynamicHiddenTransferRevertsTest is Test {
         writeFileSync('./test/test.sol', testedCode, 'utf8');
 
         let testResultJson;
-        const provider = await getProvider();
         try {
             const testCommand = `RUST_LOG=off forge test -f ${provider.connection.url} --fork-block-number ${txEvent.block.number} --json --silent`
             const timeBefore = Date.now();

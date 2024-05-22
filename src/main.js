@@ -1,5 +1,5 @@
 import { scanEthereum, runHealthCheck } from "@fortanetwork/forta-bot";
-import { handleTransaction } from "./agent.js";
+import { handleTransaction, initialize } from "./agent.js";
 
 async function main() {
     // TODO: scan other supported networks including an arbitrary RPC
@@ -10,6 +10,8 @@ async function main() {
 
     // health checks are required to run on scan nodes
     runHealthCheck();
+
+    await initialize();
 }
 
 // only run main() method if this file is directly invoked (vs imported for testing)

@@ -81,12 +81,6 @@ The sequence is an ordered list of transactions that trigger the rugpull. If you
 The following environment variables are required:
 ```plaintext
 ETHERSCAN_API_KEY
-OPTIMISM_ETHERSCAN_API_KEY
-BSCSCAN_API_KEY
-POLYGONSCAN_API_KEY
-FTMSCAN_API_KEY
-ARBISCAN_API_KEY
-SNOWTRACE_API_KEY
 ```
 
 ### Steps
@@ -130,7 +124,7 @@ To test a token contract locally:
 2. In the `handleTransaction()` function in `agent.js`, change `false` to `true` in the `provideHandleTransaction()` call:
     ```js
     // return await provideHandleTransaction(txEvent, false);
-    return await provideHandleTransaction(txEvent, true);
+    return await provideHandleTransaction(txEvent, provider, true);
     ```
 3. Run:
     ```shell
