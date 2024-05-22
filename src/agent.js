@@ -3,16 +3,15 @@ import {
   Finding,
   FindingSeverity,
   FindingType,
-  getProvider,
-  ethers,
   Label,
   EntityType,
 } from "@fortanetwork/forta-bot";
 import { existsSync, rmSync, mkdirSync, writeFileSync } from "fs";
 import { dirname as getDirName } from "path";
 import fetch from "node-fetch";
-import { DynamicTest, DefaultInjector } from "./detectors.js";
 import shell from "shelljs";
+import { ethers } from "ethers";
+import { DynamicTest, DefaultInjector } from "./detectors.js";
 
 dotenv.config();
 
@@ -47,19 +46,19 @@ const getSourceCode = async (txEvent, contractAddress) => {
   const network = parseInt(txEvent.network);
   if (network === 1) {
     apiEndpoint = `https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${ETHERSCAN_API_KEY}`;
-  // TODO: Get other networks fully working before request changes be merged into parent
-  // } else if (network === 10) {
-  //   apiEndpoint = `https://api-optimistic.etherscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${OPTIMISM_ETHERSCAN_API_KEY}`;
-  // } else if (network === 56) {
-  //   apiEndpoint = `https://api.bscscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${BSCSCAN_API_KEY}`;
-  // } else if (network === 137) {
-  //   apiEndpoint = `https://api.polygonscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${POLYGONSCAN_API_KEY}`;
-  // } else if (network === 250) {
-  //   apiEndpoint = `https://api.ftmscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${FTMSCAN_API_KEY}`;
-  // } else if (network === 42161) {
-  //   apiEndpoint = `https://api.arbiscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${ARBISCAN_API_KEY}`;
-  // } else if (network === 43114) {
-  //   apiEndpoint = `https://api.snowtrace.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${SNOWTRACE_API_KEY}`;
+    // TODO: Get other networks fully working before request changes be merged into parent
+    // } else if (network === 10) {
+    //   apiEndpoint = `https://api-optimistic.etherscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${OPTIMISM_ETHERSCAN_API_KEY}`;
+    // } else if (network === 56) {
+    //   apiEndpoint = `https://api.bscscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${BSCSCAN_API_KEY}`;
+    // } else if (network === 137) {
+    //   apiEndpoint = `https://api.polygonscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${POLYGONSCAN_API_KEY}`;
+    // } else if (network === 250) {
+    //   apiEndpoint = `https://api.ftmscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${FTMSCAN_API_KEY}`;
+    // } else if (network === 42161) {
+    //   apiEndpoint = `https://api.arbiscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${ARBISCAN_API_KEY}`;
+    // } else if (network === 43114) {
+    //   apiEndpoint = `https://api.snowtrace.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${SNOWTRACE_API_KEY}`;
   } else {
     // TODO: support arbitrary RPC
     throw new Error("Network not supported");
@@ -101,10 +100,11 @@ const runInvarianceTest = async (txEvent, createdContract, provider) => {
     // forge flatten
     let longestFlattenedContractLength = 0;
     for (const contractName of Object.keys(inner)) {
-      const contractCode = await shell.exec(
-        `forge flatten --root ./working ./working/${contractName}`,
-        { silent: true }
-      ).toString();
+      const contractCode = await shell
+        .exec(`forge flatten --root ./working ./working/${contractName}`, {
+          silent: true,
+        })
+        .toString();
       if (contractCode.length > longestFlattenedContractLength) {
         sourceCode = contractCode;
         longestFlattenedContractLength = contractCode.length;
@@ -113,7 +113,7 @@ const runInvarianceTest = async (txEvent, createdContract, provider) => {
   }
 
   const deploymentData = txEvent.transaction.data;
-  const code = await getProvider().getCode(createdContract);
+  const code = await provider.getCode(createdContract);
   const loc = deploymentData.lastIndexOf(code.slice(-32));
   if (loc < 0) return;
 
@@ -181,6 +181,9 @@ const runInvarianceTest = async (txEvent, createdContract, provider) => {
               confidence: 0.5,
             }),
           ],
+          // source: {
+          //   chains: [{chainId: 1}] // associates this finding to Ethereum mainnet
+          // }
         })
       );
       localFindingsCount += 1;
@@ -214,6 +217,9 @@ const runInvarianceTest = async (txEvent, createdContract, provider) => {
             confidence: 0.8,
           }),
         ],
+        // source: {
+        //   chains: [{chainId: 1}] // associates this finding to Ethereum mainnet
+        // }
       })
     );
   }
@@ -251,7 +257,11 @@ const runTaskConsumer = async (testingContext) => {
   }
 };
 
-export const provideHandleTransaction = async (txEvent, provider, testingContext) => {
+export const provideHandleTransaction = async (
+  txEvent,
+  provider,
+  testingContext
+) => {
   let findings = [];
 
   if (!consumerStarted) {
@@ -289,9 +299,9 @@ export const provideHandleTransaction = async (txEvent, provider, testingContext
 };
 
 export const handleTransaction = async (txEvent, provider) => {
-  return await provideHandleTransaction(txEvent, provider, false);
+  return await provideHandleTransaction(txEvent, provider, true);
 };
 
 export const initialize = async () => {
-  runTaskConsumer(false);
+  runTaskConsumer(true);
 };

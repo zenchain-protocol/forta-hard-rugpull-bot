@@ -128,7 +128,7 @@ To test a token contract locally:
     ```
 3. Run:
     ```shell
-    npm run tx <transaction_id>
+    npm run tx <transaction_id> chainId <chain_id>
     ```
 
 ## License
