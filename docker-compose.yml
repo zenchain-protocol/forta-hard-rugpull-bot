@@ -1,0 +1,79 @@
+services:
+  alice:
+    image: your/your-frontier-evm-substrate-node-image
+    ports:
+      - "9944:9944"
+      - "9615:9615"
+    command:
+      - "./usr/bin/your-frontier-evm-substrate-node-binary"
+      - "--node-key=0000000000000000000000000000000000000000000000000000000000000001"
+      - "--base-path=/tmp/alice"
+      - "--chain=local"
+      - "--port=30333"
+      - "--validator"
+      - "--alice"
+      - "--bootnodes=/dns/bob/tcp/30333/p2p/12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD"
+      - "--unsafe-rpc-external"
+      - "--log=sub-libp2p=trace"
+      - "--rpc-cors=all"
+    networks:
+      - internal_network
+
+  bob:
+    image: your/your-frontier-evm-substrate-node-image
+    ports:
+      - "9945:9944"
+    command:
+      - "./usr/bin/your-frontier-evm-substrate-node-binary"
+      - "--node-key=0000000000000000000000000000000000000000000000000000000000000002"
+      - "--base-path=/tmp/bob"
+      - "--chain=local"
+      - "--port=30333"
+      - "--validator"
+      - "--bob"
+      - "--bootnodes=/dns/alice/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
+      - "--rpc-cors=all"
+      - "--unsafe-rpc-external"
+      - "--log=sub-libp2p=trace"
+    networks:
+      - internal_network
+
+  dave:
+    image: your/your-frontier-evm-substrate-node-image
+    ports:
+      - "9946:9944"
+    command:
+      - "./usr/bin/your-frontier-evm-substrate-node-binary"
+      - "--node-key=0000000000000000000000000000000000000000000000000000000000000003"
+      - "--base-path=/tmp/light"
+      - "--chain=local"
+      - "--port=30333"
+      - "--bootnodes=/dns/alice/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
+      - "--bootnodes=/dns/bob/tcp/30333/p2p/12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD"
+      - "--rpc-cors=all"
+      - "--unsafe-rpc-external"
+      - "--log=sub-libp2p=trace"
+    networks:
+      - internal_network
+
+  node_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+      - ETHEREUM_RPC=http://alice:9944
+    volumes:
+      - .:/app
+    ports:
+      - "3000:3000"
+    entrypoint: ["/app/start.sh"]
+    depends_on:
+      - alice
+      - bob
+      - dave
+    networks:
+      - internal_network
+
+networks:
+  internal_network:

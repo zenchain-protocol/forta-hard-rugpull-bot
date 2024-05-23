@@ -40,4 +40,4 @@ RUN mkdir test && \
 
 RUN chmod +x start.sh
 
-ENTRYPOINT [ "/app/start.sh" ]
+CMD [ "bash", "start.sh" ]
