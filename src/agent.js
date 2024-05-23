@@ -15,7 +15,7 @@ import { DynamicTest, DefaultInjector } from "./detectors.js";
 
 dotenv.config();
 
-const BLOCKSCOUT_API_KEY = process.env.BLOCKSCOUT_API_KEY
+const BLOCKSCOUT_ETHERUM_API_KEY = process.env.BLOCKSCOUT_ETHERUM_API_KEY
 // TODO: Get other networks fully working before request changes be merged into parent
 // const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 // const OPTIMISM_ETHERSCAN_API_KEY = process.env.OPTIMISM_ETHERSCAN_API_KEY;
@@ -46,7 +46,7 @@ const getSourceCode = async (txEvent, contractAddress) => {
   let apiEndpoint;
   const network = parseInt(txEvent.network);
   if (network === 1) {
-    apiEndpoint = `https://eth.blockscout.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${BLOCKSCOUT_API_KEY}`;
+    apiEndpoint = `https://eth.blockscout.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${BLOCKSCOUT_ETHERUM_API_KEY}`;
     // TODO: Get other networks fully working before request changes be merged into parent
     // apiEndpoint = `https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${ETHERSCAN_API_KEY}`;
     // } else if (network === 10) {
@@ -62,8 +62,7 @@ const getSourceCode = async (txEvent, contractAddress) => {
     // } else if (network === 43114) {
     //   apiEndpoint = `https://api.snowtrace.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${SNOWTRACE_API_KEY}`;
   } else {
-    // TODO: support arbitrary RPC
-    throw new Error("Network not supported");
+    apiEndpoint = `${ARBITRARY_BLOCKSCOUT_ENDPOINT}/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${ARBITRARY_BLOCKSCOUT_API_KEY}`;
   }
 
   const response = await fetch(apiEndpoint);
