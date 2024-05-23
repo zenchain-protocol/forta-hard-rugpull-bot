@@ -62,7 +62,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - NODE_ENV=production
-      - ETHEREUM_RPC=http://alice:9944
+      - EVM_RPC=http://alice:9944
     volumes:
       - .:/app
     ports:

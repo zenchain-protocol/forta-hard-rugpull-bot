@@ -80,8 +80,8 @@ The sequence is an ordered list of transactions that trigger the rugpull. If you
 
 The following environment variables are required:
 ```plaintext
-ETHERSCAN_API_KEY
-ETHEREUM_RPC
+BLOCKSCOUT_API_KEY
+EVM_RPC
 TESTING
 ```
 

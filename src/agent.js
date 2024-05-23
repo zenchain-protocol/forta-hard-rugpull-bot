@@ -15,8 +15,9 @@ import { DynamicTest, DefaultInjector } from "./detectors.js";
 
 dotenv.config();
 
-const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
+const BLOCKSCOUT_API_KEY = process.env.BLOCKSCOUT_API_KEY
 // TODO: Get other networks fully working before request changes be merged into parent
+// const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 // const OPTIMISM_ETHERSCAN_API_KEY = process.env.OPTIMISM_ETHERSCAN_API_KEY;
 // const BSCSCAN_API_KEY = process.env.BSCSCAN_API_KEY;
 // const POLYGONSCAN_API_KEY = process.env.POLYGONSCAN_API_KEY;
@@ -45,8 +46,9 @@ const getSourceCode = async (txEvent, contractAddress) => {
   let apiEndpoint;
   const network = parseInt(txEvent.network);
   if (network === 1) {
-    apiEndpoint = `https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${ETHERSCAN_API_KEY}`;
+    apiEndpoint = `https://eth.blockscout.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${BLOCKSCOUT_API_KEY}`;
     // TODO: Get other networks fully working before request changes be merged into parent
+    // apiEndpoint = `https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${ETHERSCAN_API_KEY}`;
     // } else if (network === 10) {
     //   apiEndpoint = `https://api-optimistic.etherscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${OPTIMISM_ETHERSCAN_API_KEY}`;
     // } else if (network === 56) {
@@ -66,7 +68,13 @@ const getSourceCode = async (txEvent, contractAddress) => {
 
   const response = await fetch(apiEndpoint);
   const data = await response.json();
-  return data.result[0].SourceCode;
+  if (data.result[0] !== undefined) {
+    // Etherscan response
+    return data.result[0].SourceCode;
+  } else {
+    // Blockscout response
+    return data.result.source_code;
+  }
 };
 
 const runInvarianceTest = async (txEvent, createdContract, provider) => {
