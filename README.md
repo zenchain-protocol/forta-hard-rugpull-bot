@@ -82,6 +82,7 @@ The following environment variables are required:
 ```plaintext
 ETHERSCAN_API_KEY
 ETHEREUM_RPC
+TESTING
 ```
 
 ### Steps

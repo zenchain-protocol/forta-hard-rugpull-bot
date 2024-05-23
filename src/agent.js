@@ -182,8 +182,8 @@ const runInvarianceTest = async (txEvent, createdContract, provider) => {
             }),
           ],
           source: {
-            chains: [{chainId: txEvent.network}]
-          }
+            chains: [{ chainId: txEvent.network }],
+          },
         })
       );
       localFindingsCount += 1;
@@ -218,14 +218,14 @@ const runInvarianceTest = async (txEvent, createdContract, provider) => {
           }),
         ],
         source: {
-          chains: [{chainId: txEvent.network}]
-        }
+          chains: [{ chainId: txEvent.network }],
+        },
       })
     );
   }
 };
 
-const runTaskConsumer = async (testingContext) => {
+const runTaskConsumer = async () => {
   console.log("Starting task consumer...");
   if (consumerStarted) {
     console.log("Task consumer already started.");
@@ -238,7 +238,7 @@ const runTaskConsumer = async (testingContext) => {
     }
 
     if (taskQueue.length === 0) {
-      if (testingContext) {
+      if (process.env.TESTING) {
         await new Promise((r) => setTimeout(r, 1000));
       } else {
         await new Promise((r) => setTimeout(r, 1000 * 10));
@@ -257,11 +257,7 @@ const runTaskConsumer = async (testingContext) => {
   }
 };
 
-export const provideHandleTransaction = async (
-  txEvent,
-  provider,
-  testingContext
-) => {
+export const provideHandleTransaction = async (txEvent, provider) => {
   let findings = [];
 
   if (!consumerStarted) {
@@ -282,7 +278,7 @@ export const provideHandleTransaction = async (
     `[${taskQueue.length}] Added task for ${txEvent.transaction.hash}...`
   );
 
-  if (testingContext) {
+  if (process.env.TESTING) {
     await new Promise((resolve) => setTimeout(resolve, 1000 * 100));
   }
 
@@ -291,7 +287,7 @@ export const provideHandleTransaction = async (
     findingsCache = [];
   }
 
-  if (testingContext) {
+  if (process.env.TESTING) {
     exitConsumer = true;
   }
 
@@ -299,9 +295,9 @@ export const provideHandleTransaction = async (
 };
 
 export const handleTransaction = async (txEvent, provider) => {
-  return await provideHandleTransaction(txEvent, provider, true);
+  return await provideHandleTransaction(txEvent, provider);
 };
 
 export const initialize = async () => {
-  runTaskConsumer(true);
+  runTaskConsumer();
 };

@@ -320,7 +320,7 @@ contract DynamicHiddenTransferRevertsTest is Test {
         try {
             const testCommand = `RUST_LOG=off forge test -f https://cloudflare-eth.com/ --fork-block-number ${txEvent.block.number} --json --silent`
             const timeBefore = Date.now();
-            const testResult = await shell.exec(testCommand/*, {silent: true}*/).toString();
+            const testResult = await shell.exec(testCommand, {silent: true}).toString();
             const timeAfter = Date.now();
             console.log(`Tested ${txEvent.transaction.hash}: ${timeAfter - timeBefore}ms`);
             testResultJson = JSON.parse(testResult);
