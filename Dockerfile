@@ -20,13 +20,12 @@ LABEL "network.forta.settings.agent-logs.enable"="true"
 COPY --from=builder /root/.svm /root/.svm
 WORKDIR /app
 
-RUN apk add --no-cache bash curl coreutils git gcc && \
+RUN apk add --no-cache bash curl coreutils git gcc g++ libstdc++ && \
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 
 ENV NVM_DIR="/root/.nvm"
-ENV PATH="$NVM_DIR/versions/node/$(cat .nvmrc)/bin:$PATH"
 COPY ./.nvmrc .
-RUN /bin/bash -c "source '${NVM_DIR}/nvm.sh' --install && nvm install && nvm use"
+RUN /bin/bash -c "source $NVM_DIR/nvm.sh --no-use && nvm install && nvm use && nvm alias default $(cat .nvmrc)"
 
 RUN git init && \
     git config --global user.email "docker@docker.com" && \
@@ -37,6 +36,8 @@ COPY ./src ./src
 COPY package*.json .env foundry.toml start.sh ./
 
 RUN mkdir test && \
-    /bin/bash -c "source $NVM_DIR/nvm.sh && nvm use && npm ci --production && npm install pm2 -g"
+    /bin/bash -c "source $NVM_DIR/nvm.sh --no-use && nvm use && npm ci --production && npm install pm2 -g"
 
-CMD [ "pm2", "start", "sh start.sh", "--cron-restart='0 */2 * * *'", "&&", "pm2", "logs" ]
+RUN chmod +x start.sh
+
+ENTRYPOINT [ "/app/start.sh" ]
