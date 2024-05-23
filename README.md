@@ -81,6 +81,7 @@ The sequence is an ordered list of transactions that trigger the rugpull. If you
 The following environment variables are required:
 ```plaintext
 ETHERSCAN_API_KEY
+ETHEREUM_RPC
 ```
 
 ### Steps
@@ -97,17 +98,22 @@ ETHERSCAN_API_KEY
     nvm use
     ```
 
-3. Install dependencies:
+3. Install the current version of Foundry and follow the post-install steps output:
+```shell
+curl -L https://foundry.paradigm.xyz | bash
+```
+
+4. Install dependencies:
     ```shell
     npm install
     ```
 
-4. Create a `.env` file from the `.env.example` file and add your API keys:
+5. Create a `.env` file from the `.env.example` file and add your API keys:
     ```bash
     cp .env.example .env
     ```
 
-5. Start the development server:
+6. Start the development server:
     ```shell
     npm run start
     ```

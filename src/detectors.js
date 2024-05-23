@@ -4,6 +4,7 @@ import { writeFileSync } from 'fs';
 import shell from 'shelljs';
 import { ethers } from "@fortanetwork/forta-bot";
 import { parseContract } from './parser.js';
+import solidityPlugin from 'prettier-plugin-solidity/standalone';
 
 const findConstructor = (entryContract) => {
     let constructor;
@@ -17,9 +18,10 @@ const findConstructor = (entryContract) => {
     return constructor;
 }
 
-export const DefaultInjector = (sourceCode) => {
-    const formattedSourceCode = format(sourceCode, {
+export const DefaultInjector = async (sourceCode) => {
+    const formattedSourceCode = await format(sourceCode, {
         parser: 'solidity-parse',
+        plugins: [solidityPlugin],
     });
     const contractInfo = parseContract(formattedSourceCode)
 
@@ -58,8 +60,9 @@ export const DefaultInjector = (sourceCode) => {
         injectSourceCode += '\npragma experimental ABIEncoderV2;\n';
     }
     injectSourceCode += '\nimport "forge-std/Test.sol";\n';
-    return format(injectSourceCode, {
+    return await format(injectSourceCode, {
         parser: 'solidity-parse',
+        plugins: [solidityPlugin],
     })
 }
 
@@ -315,14 +318,14 @@ contract DynamicHiddenTransferRevertsTest is Test {
 
         let testResultJson;
         try {
-            const testCommand = `RUST_LOG=off forge test -f ${provider.connection.url} --fork-block-number ${txEvent.block.number} --json --silent`
+            const testCommand = `RUST_LOG=off forge test -f https://cloudflare-eth.com/ --fork-block-number ${txEvent.block.number} --json --silent`
             const timeBefore = Date.now();
-            const testResult = await shell.exec(testCommand, {silent: true}).toString();
+            const testResult = await shell.exec(testCommand/*, {silent: true}*/).toString();
             const timeAfter = Date.now();
             console.log(`Tested ${txEvent.transaction.hash}: ${timeAfter - timeBefore}ms`);
             testResultJson = JSON.parse(testResult);
         } catch (e) {
-            // console.error(e)
+            console.error(e)
             return {};
         }
 

@@ -126,7 +126,7 @@ const runInvarianceTest = async (txEvent, createdContract, provider) => {
     rmSync("./out", { recursive: true });
   }
 
-  const injectedSourceCode = DefaultInjector(sourceCode);
+  const injectedSourceCode = await DefaultInjector(sourceCode);
   testing = new DynamicTest(injectedSourceCode, constructArguments);
 
   const results = await testing.test(txEvent, provider);
@@ -181,9 +181,9 @@ const runInvarianceTest = async (txEvent, createdContract, provider) => {
               confidence: 0.5,
             }),
           ],
-          // source: {
-          //   chains: [{chainId: 1}] // associates this finding to Ethereum mainnet
-          // }
+          source: {
+            chains: [{chainId: txEvent.network}]
+          }
         })
       );
       localFindingsCount += 1;
@@ -217,9 +217,9 @@ const runInvarianceTest = async (txEvent, createdContract, provider) => {
             confidence: 0.8,
           }),
         ],
-        // source: {
-        //   chains: [{chainId: 1}] // associates this finding to Ethereum mainnet
-        // }
+        source: {
+          chains: [{chainId: txEvent.network}]
+        }
       })
     );
   }
@@ -252,7 +252,7 @@ const runTaskConsumer = async (testingContext) => {
 
       await runInvarianceTest(txEvent, createdContract, provider);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 };

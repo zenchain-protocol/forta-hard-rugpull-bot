@@ -1,10 +1,12 @@
 import { scanEthereum, runHealthCheck } from "@fortanetwork/forta-bot";
 import { handleTransaction, initialize } from "./agent.js";
 
+const ETHEREUM_RPC = process.env.ETHEREUM_RPC;
+
 async function main() {
-    // TODO: scan other supported networks including an arbitrary RPC
+    // TODO: scan other supported networks
     scanEthereum({
-      rpcUrl: "https://cloudflare-eth.com/",
+      rpcUrl: ETHEREUM_RPC,
       handleTransaction,
     });
 
