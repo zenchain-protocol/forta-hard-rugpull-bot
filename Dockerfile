@@ -1,4 +1,4 @@
-FROM rust:alpine3.16 as builder
+FROM rust:alpine3.18 as builder
 RUN apk update &&  \
     apk add musl-dev &&  \
     rustup default nightly &&  \
@@ -14,21 +14,29 @@ RUN svm install 0.4.10 && \
     svm install 0.8.0 && \
     svm install 0.8.19
 
-FROM ghcr.io/foundry-rs/foundry
+FROM ghcr.io/foundry-rs/foundry:latest
 ENV NODE_ENV=production
-# Uncomment the following line to enable agent logging
 LABEL "network.forta.settings.agent-logs.enable"="true"
 COPY --from=builder /root/.svm /root/.svm
 WORKDIR /app
+
+RUN apk add --no-cache bash curl coreutils git gcc && \
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+
+ENV NVM_DIR="/root/.nvm"
+ENV PATH="$NVM_DIR/versions/node/$(cat .nvmrc)/bin:$PATH"
+COPY ./.nvmrc .
+RUN /bin/bash -c "source '${NVM_DIR}/nvm.sh' --install && nvm install && nvm use"
+
 RUN git init && \
     git config --global user.email "docker@docker.com" && \
     git config --global user.name "Docker" && \
-    forge install foundry-rs/forge-std
+    forge install foundry-rs/forge-std --no-commit
+
 COPY ./src ./src
 COPY package*.json .env foundry.toml start.sh ./
+
 RUN mkdir test && \
-    apk update && \
-    apk add --update --no-cache nodejs npm procps && \
-    npm ci --production && \
-    npm install pm2 -g
-CMD [ "pm2 start 'sh start.sh' --cron-restart='0 */2 * * *' && pm2 logs" ]
+    /bin/bash -c "source $NVM_DIR/nvm.sh && nvm use && npm ci --production && npm install pm2 -g"
+
+CMD [ "pm2", "start", "sh start.sh", "--cron-restart='0 */2 * * *'", "&&", "pm2", "logs" ]
