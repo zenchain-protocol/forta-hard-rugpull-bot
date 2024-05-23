@@ -2,7 +2,7 @@ import { visit } from '@solidity-parser/parser';
 import { format } from "prettier";
 import { writeFileSync } from 'fs';
 import shell from 'shelljs';
-import { ethers } from "@fortanetwork/forta-bot";
+import { ethers } from "ethers";
 import { parseContract } from './parser.js';
 import solidityPlugin from 'prettier-plugin-solidity/standalone';
 

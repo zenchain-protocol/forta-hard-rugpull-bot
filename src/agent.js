@@ -268,7 +268,7 @@ export const provideHandleTransaction = async (txEvent, provider) => {
   let findings = [];
 
   if (!consumerStarted) {
-    runTaskConsumer(testingContext, provider);
+    runTaskConsumer(provider);
   }
 
   const createdContract = await getCreatedContractAddress(txEvent);
