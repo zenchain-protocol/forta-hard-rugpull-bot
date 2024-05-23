@@ -99,9 +99,9 @@ ETHEREUM_RPC
     ```
 
 3. Install the current version of Foundry and follow the post-install steps output:
-```shell
-curl -L https://foundry.paradigm.xyz | bash
-```
+    ```shell
+    curl -L https://foundry.paradigm.xyz | bash
+    ```
 
 4. Install dependencies:
     ```shell
