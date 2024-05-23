@@ -123,7 +123,7 @@ TESTING
 
 ## Testing
 
-To test a specific transaction, run:
+To test a specific transaction ([positive example](https://etherscan.io/tx/0x22369564145b28ae5eb75e9a37c213c2ccca1e01ffc597935f84aa24e9511cf1)), run:
 ```shell
 npm run tx <transaction_id>
 ```
