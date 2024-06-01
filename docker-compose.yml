@@ -1,11 +1,11 @@
 services:
   alice:
-    image: your/your-frontier-evm-substrate-node-image
+    image: krisbit/zenchain-testnet
     ports:
       - "9944:9944"
       - "9615:9615"
     command:
-      - "./usr/bin/your-frontier-evm-substrate-node-binary"
+      - "./usr/bin/zenchain-node"
       - "--node-key=0000000000000000000000000000000000000000000000000000000000000001"
       - "--base-path=/tmp/alice"
       - "--chain=local"
@@ -20,11 +20,11 @@ services:
       - internal_network
 
   bob:
-    image: your/your-frontier-evm-substrate-node-image
+    image: krisbit/zenchain-testnet
     ports:
       - "9945:9944"
     command:
-      - "./usr/bin/your-frontier-evm-substrate-node-binary"
+      - "./usr/bin/zenchain-node"
       - "--node-key=0000000000000000000000000000000000000000000000000000000000000002"
       - "--base-path=/tmp/bob"
       - "--chain=local"
@@ -39,11 +39,11 @@ services:
       - internal_network
 
   dave:
-    image: your/your-frontier-evm-substrate-node-image
+    image: krisbit/zenchain-testnet
     ports:
       - "9946:9944"
     command:
-      - "./usr/bin/your-frontier-evm-substrate-node-binary"
+      - "./usr/bin/zenchain-node"
       - "--node-key=0000000000000000000000000000000000000000000000000000000000000003"
       - "--base-path=/tmp/light"
       - "--chain=local"
