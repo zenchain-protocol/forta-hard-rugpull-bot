@@ -126,7 +126,7 @@ To run the project using Docker, follow these steps:
 
 1. Build the Docker containers:
     ```shell
-    docker-compose build --build-arg INSTALL_DEV=true
+    docker-compose build --build-arg INSTALL_DEV=true --build-arg NODE_ENV=development
     ```
 
 2. Start the containers:

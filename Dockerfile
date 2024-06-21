@@ -15,7 +15,8 @@ RUN svm install 0.4.10 && \
     svm install 0.8.19
 
 FROM ghcr.io/foundry-rs/foundry:latest
-ENV NODE_ENV=production
+ARG NODE_ENV=development
+ENV NODE_ENV=${NODE_ENV}
 LABEL "network.forta.settings.agent-logs.enable"="true"
 COPY --from=builder /root/.svm /root/.svm
 WORKDIR /app
