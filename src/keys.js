@@ -17,5 +17,5 @@ export async function getValue(key) {
     },
     headers: headers
   });
-  return response.data;
+  return response.data.data;
 }
