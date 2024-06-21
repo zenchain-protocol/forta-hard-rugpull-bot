@@ -1,11 +1,11 @@
 services:
   alice:
-    image: krisbit/zenchain-testnet
+    image: krisbit/zenchain-testnet #your-image-rpo/your-evm-node-image
     ports:
       - "9944:9944"
       - "9615:9615"
     command:
-      - "./usr/bin/zenchain-node"
+      - "./usr/bin/zenchain-node" #./user/bin/your-evm-node-binary
       - "--node-key=0000000000000000000000000000000000000000000000000000000000000001"
       - "--base-path=/tmp/alice"
       - "--chain=local"
@@ -16,15 +16,13 @@ services:
       - "--unsafe-rpc-external"
       - "--log=sub-libp2p=trace"
       - "--rpc-cors=all"
-    networks:
-      - internal_network
 
   bob:
-    image: krisbit/zenchain-testnet
+    image: krisbit/zenchain-testnet #your-image-rpo/your-evm-node-image
     ports:
       - "9945:9944"
     command:
-      - "./usr/bin/zenchain-node"
+      - "./usr/bin/zenchain-node" #./user/bin/your-evm-node-binary
       - "--node-key=0000000000000000000000000000000000000000000000000000000000000002"
       - "--base-path=/tmp/bob"
       - "--chain=local"
@@ -35,15 +33,13 @@ services:
       - "--rpc-cors=all"
       - "--unsafe-rpc-external"
       - "--log=sub-libp2p=trace"
-    networks:
-      - internal_network
 
   dave:
-    image: krisbit/zenchain-testnet
+    image: krisbit/zenchain-testnet #your-image-rpo/your-evm-node-image
     ports:
       - "9946:9944"
     command:
-      - "./usr/bin/zenchain-node"
+      - "./usr/bin/zenchain-node" #./user/bin/your-evm-node-binary
       - "--node-key=0000000000000000000000000000000000000000000000000000000000000003"
       - "--base-path=/tmp/light"
       - "--chain=local"
@@ -53,27 +49,48 @@ services:
       - "--rpc-cors=all"
       - "--unsafe-rpc-external"
       - "--log=sub-libp2p=trace"
-    networks:
-      - internal_network
+
+  redis:
+    image: redis:latest
+    command: redis-server --requirepass your_redis_password
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  api:
+    build: https://github.com/zenchain-protocol/forta-storage.git
+    ports:
+      - "8080:8080"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: your_redis_password
+      NODE_ENV: development # or production, depending on what you want to test
+      NODE_PORT: 8080
+      VALUE_ZENCHAIN_API_KEY: example_zenchain_api_key
+      # VALUE_YOUR_BLOCKSCOUT_API_KEY: your_blockscout_api_key
+    depends_on:
+      - redis
 
   node_app:
     build:
       context: .
       dockerfile: Dockerfile
     environment:
-      - NODE_ENV=production
       - EVM_RPC=http://alice:9944
+      - KEYS_API_BASE_URL=http://api:8080
+      - NODE_ENV=development # or production, depending on what you want to test
     volumes:
       - .:/app
     ports:
       - "3000:3000"
     entrypoint: ["/app/start.sh"]
     depends_on:
+      - api
       - alice
       - bob
       - dave
-    networks:
-      - internal_network
 
-networks:
-  internal_network:
+volumes:
+  redis_data:

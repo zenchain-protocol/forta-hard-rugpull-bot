@@ -82,7 +82,6 @@ The following environment variables are required in an `.env` file (referencing 
 ```plaintext
 ARBITRARY_BLOCKSCOUT_ENDPOINT
 ARBITRARY_BLOCKSCOUT_API_KEY
-BLOCKSCOUT_ETHERUM_API_KEY
 EVM_RPC
 TESTING
 ```
@@ -120,6 +119,22 @@ TESTING
     ```shell
     npm run start
     ```
+
+## Running with Docker
+
+To run the project using Docker, follow these steps:
+
+1. Build the Docker containers:
+    ```shell
+    docker-compose build --build-arg INSTALL_DEV=true
+    ```
+
+2. Start the containers:
+    ```shell
+    docker-compose up
+    ```
+
+This will build and start all services defined in the Docker Compose file. You can access the services locally as defined in the Docker Compose configuration.
 
 ## Testing
 

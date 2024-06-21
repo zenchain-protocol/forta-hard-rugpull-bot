@@ -12,10 +12,11 @@ import fetch from "node-fetch";
 import shell from "shelljs";
 import { ethers } from "ethers";
 import { DynamicTest, DefaultInjector } from "./detectors.js";
+import { getValue } from "./keys.js";
 
 dotenv.config();
 
-const BLOCKSCOUT_ETHERUM_API_KEY = process.env.BLOCKSCOUT_ETHERUM_API_KEY
+const BLOCKSCOUT_ETHERUM_API_KEY = getValue(process.env.ARBITRARY_BLOCKSCOUT_API_KEY)
 // TODO: Get other networks fully working before request changes be merged into parent
 // const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 // const OPTIMISM_ETHERSCAN_API_KEY = process.env.OPTIMISM_ETHERSCAN_API_KEY;
@@ -24,6 +25,7 @@ const BLOCKSCOUT_ETHERUM_API_KEY = process.env.BLOCKSCOUT_ETHERUM_API_KEY
 // const FTMSCAN_API_KEY = process.env.FTMSCAN_API_KEY;
 // const ARBISCAN_API_KEY = process.env.ARBISCAN_API_KEY;
 // const SNOWTRACE_API_KEY = process.env.SNOWTRACE_API_KEY;
+const ARBITRARY_BLOCKSCOUT_API_KEY = getValue(process.env.ARBITRARY_BLOCKSCOUT_API_KEY)
 
 const taskQueue = [];
 let findingsCache = [];
