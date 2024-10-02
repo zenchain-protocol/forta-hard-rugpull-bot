@@ -4,23 +4,10 @@
   "description": "A forta agent that detects hard rugpulls",
   "repository": "https://github.com/Soptq/forta-hard-rugpull",
   "chainIds": [
-    1,
-    10,
-    56,
-    137,
-    250,
-    42161,
-    43114
+    8408,
+    8108
   ],
   "chainSettings": {
-    "56": {
-      "shards": 4,
-      "target": 5
-    },
-    "137": {
-      "shards": 4,
-      "target": 5
-    },
     "default": {
       "shards": 2,
       "target": 10

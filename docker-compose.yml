@@ -1,6 +1,7 @@
 services:
   alice:
-    image: krisbit/zenchain-testnet #your-image-rpo/your-evm-node-image
+    platform: linux/x86_64
+    image: ghcr.io/zenchain-protocol/zenchain-testnet:latest
     ports:
       - "9944:9944"
       - "9615:9615"
@@ -18,7 +19,8 @@ services:
       - "--rpc-cors=all"
 
   bob:
-    image: krisbit/zenchain-testnet #your-image-rpo/your-evm-node-image
+    platform: linux/x86_64
+    image: ghcr.io/zenchain-protocol/zenchain-testnet:latest #your-image-rpo/your-evm-node-image
     ports:
       - "9945:9944"
     command:
@@ -35,7 +37,8 @@ services:
       - "--log=sub-libp2p=trace"
 
   dave:
-    image: krisbit/zenchain-testnet #your-image-rpo/your-evm-node-image
+    platform: linux/x86_64
+    image: ghcr.io/zenchain-protocol/zenchain-testnet:latest #your-image-rpo/your-evm-node-image
     ports:
       - "9946:9944"
     command:
@@ -51,6 +54,7 @@ services:
       - "--log=sub-libp2p=trace"
 
   redis:
+    platform: linux/x86_64
     image: redis:latest
     command: redis-server --requirepass your_redis_password
     ports:
@@ -59,6 +63,7 @@ services:
       - redis_data:/data
 
   api:
+    platform: linux/x86_64
     build: https://github.com/zenchain-protocol/forta-storage.git
     ports:
       - "8080:8080"
@@ -74,6 +79,7 @@ services:
       - redis
 
   node_app:
+    platform: linux/x86_64
     build:
       context: .
       dockerfile: Dockerfile
