@@ -80,8 +80,6 @@ The sequence is an ordered list of transactions that trigger the rugpull. If you
 
 The following environment variables are required in an `.env` file (referencing the `.env.example` file):
 ```plaintext
-ARBITRARY_BLOCKSCOUT_ENDPOINT
-ARBITRARY_BLOCKSCOUT_API_KEY
 EVM_RPC
 TESTING
 ```

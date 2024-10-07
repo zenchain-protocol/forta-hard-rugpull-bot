@@ -15,8 +15,19 @@ RUN svm install 0.4.10 && \
     svm install 0.8.19
 
 FROM ghcr.io/foundry-rs/foundry:latest
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
+
+# Define build-time arguments
+ARG CHAIN_ID
+ARG EVM_RPC
+ARG STORAGE_API_URL
+ARG NODE_ENV
+
+# Set environment variables in the container
+ENV CHAIN_ID=$CHAIN_ID
+ENV EVM_RPC=$EVM_RPC
+ENV STORAGE_API_URL=$STORAGE_API_URL
+ENV NODE_ENV=$NODE_ENV
+
 LABEL "network.forta.settings.agent-logs.enable"="true"
 COPY --from=builder /root/.svm /root/.svm
 WORKDIR /app
@@ -34,10 +45,9 @@ RUN git init && \
     forge install foundry-rs/forge-std --no-commit
 
 COPY ./src ./src
-COPY package*.json .env foundry.toml start.sh ./
+COPY package*.json foundry.toml start.sh ./
 
-RUN mkdir test && \
-    /bin/bash -c "source $NVM_DIR/nvm.sh --no-use && nvm use && npm ci --production && npm install pm2 -g"
+RUN /bin/bash -c "source $NVM_DIR/nvm.sh --no-use && nvm use && npm ci --production && npm install pm2 -g"
 
 RUN chmod +x start.sh
 

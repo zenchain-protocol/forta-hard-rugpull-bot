@@ -12,20 +12,19 @@ import fetch from "node-fetch";
 import shell from "shelljs";
 import { ethers } from "ethers";
 import { DynamicTest, DefaultInjector } from "./detectors.js";
-import { getValue } from "./keys.js";
+import {getSecrets} from "./storage.js";
 
 dotenv.config();
 
-const BLOCKSCOUT_ETHERUM_API_KEY = getValue(process.env.ARBITRARY_BLOCKSCOUT_API_KEY)
-// TODO: Get other networks fully working before request changes be merged into parent
-// const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
-// const OPTIMISM_ETHERSCAN_API_KEY = process.env.OPTIMISM_ETHERSCAN_API_KEY;
-// const BSCSCAN_API_KEY = process.env.BSCSCAN_API_KEY;
-// const POLYGONSCAN_API_KEY = process.env.POLYGONSCAN_API_KEY;
-// const FTMSCAN_API_KEY = process.env.FTMSCAN_API_KEY;
-// const ARBISCAN_API_KEY = process.env.ARBISCAN_API_KEY;
-// const SNOWTRACE_API_KEY = process.env.SNOWTRACE_API_KEY;
-const ARBITRARY_BLOCKSCOUT_API_KEY = getValue(process.env.ARBITRARY_BLOCKSCOUT_API_KEY)
+const secrets = await getSecrets();
+const ETHERSCAN_API_KEY = secrets['apiKeys']['ETHERSCAN_API_KEY'];
+const OPTIMISM_ETHERSCAN_API_KEY = secrets['apiKeys']['OPTIMISTICSCAN_API_KEY'];
+const BSCSCAN_API_KEY = secrets['apiKeys']['BSCSCAN_API_KEY'];
+const POLYGONSCAN_API_KEY = secrets['apiKeys']['POLYGONSCAN_API_KEY'];
+const FTMSCAN_API_KEY = secrets['apiKeys']['FTMSCAN_API_KEY'];
+const ARBISCAN_API_KEY = secrets['apiKeys']['ARBISCAN_API_KEY'];
+const SNOWTRACE_API_KEY = secrets['apiKeys']['SNOWTRACE_API_KEY'];
+const ZENTRACE_API_KEY = secrets['apiKeys']['ZENTRACE_API_KEY'];
 
 const taskQueue = [];
 let findingsCache = [];
@@ -48,23 +47,24 @@ const getSourceCode = async (txEvent, contractAddress) => {
   let apiEndpoint;
   const network = parseInt(txEvent.network);
   if (network === 1) {
-    apiEndpoint = `https://eth.blockscout.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${BLOCKSCOUT_ETHERUM_API_KEY}`;
     // TODO: Get other networks fully working before request changes be merged into parent
-    // apiEndpoint = `https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${ETHERSCAN_API_KEY}`;
-    // } else if (network === 10) {
-    //   apiEndpoint = `https://api-optimistic.etherscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${OPTIMISM_ETHERSCAN_API_KEY}`;
-    // } else if (network === 56) {
-    //   apiEndpoint = `https://api.bscscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${BSCSCAN_API_KEY}`;
-    // } else if (network === 137) {
-    //   apiEndpoint = `https://api.polygonscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${POLYGONSCAN_API_KEY}`;
-    // } else if (network === 250) {
-    //   apiEndpoint = `https://api.ftmscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${FTMSCAN_API_KEY}`;
-    // } else if (network === 42161) {
-    //   apiEndpoint = `https://api.arbiscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${ARBISCAN_API_KEY}`;
-    // } else if (network === 43114) {
-    //   apiEndpoint = `https://api.snowtrace.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${SNOWTRACE_API_KEY}`;
+    apiEndpoint = `https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${ETHERSCAN_API_KEY}`;
+  } else if (network === 10) {
+    apiEndpoint = `https://api-optimistic.etherscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${OPTIMISM_ETHERSCAN_API_KEY}`;
+  } else if (network === 56) {
+    apiEndpoint = `https://api.bscscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${BSCSCAN_API_KEY}`;
+  } else if (network === 137) {
+    apiEndpoint = `https://api.polygonscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${POLYGONSCAN_API_KEY}`;
+  } else if (network === 250) {
+    apiEndpoint = `https://api.ftmscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${FTMSCAN_API_KEY}`;
+  } else if (network === 42161) {
+    apiEndpoint = `https://api.arbiscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${ARBISCAN_API_KEY}`;
+  } else if (network === 43114) {
+    apiEndpoint = `https://api.snowtrace.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${SNOWTRACE_API_KEY}`;
+  } else if (network === 8408) {
+    apiEndpoint = `https://zentrace.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${ZENTRACE_API_KEY}`;
   } else {
-    apiEndpoint = `${ARBITRARY_BLOCKSCOUT_ENDPOINT}/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${ARBITRARY_BLOCKSCOUT_API_KEY}`;
+    throw Error(`Unsupported Network: ${network}`);
   }
 
   const response = await fetch(apiEndpoint);
