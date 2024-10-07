@@ -60,3 +60,4 @@ jobs:
             EVM_RPC=${{ secrets.EVM_RPC }}
             STORAGE_API_URL=${{ secrets.STORAGE_API_URL }}
             NODE_ENV=production
+            TESTING=false
