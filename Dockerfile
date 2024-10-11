@@ -45,7 +45,7 @@ RUN git init && \
     forge install foundry-rs/forge-std --no-commit
 
 COPY ./src ./src
-COPY package*.json foundry.toml start.sh ./
+COPY package*.json .env foundry.toml start.sh ./
 
 RUN /bin/bash -c "source $NVM_DIR/nvm.sh --no-use && nvm use && npm ci --production && npm install pm2 -g"
 
