@@ -45,5 +45,9 @@
   "devDependencies": {
     "nodemon": "^3.1.0"
   },
+  "overrides": {
+    "ws": "^7.5.10",
+    "elliptic": "^6.6.0"
+  },
   "type": "module"
 }
